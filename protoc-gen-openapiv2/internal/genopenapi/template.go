@@ -1700,7 +1700,7 @@ func updateOpenAPIDataFromComments(reg *descriptor.Registry, swaggerObject inter
 	}
 
 	// Figure out which properties to update.
-	summaryValue := infoObjectValue.FieldByName("Summary")
+	//summaryValue := infoObjectValue.FieldByName("Summary")
 	descriptionValue := infoObjectValue.FieldByName("Description")
 	readOnlyValue := infoObjectValue.FieldByName("ReadOnly")
 
@@ -1708,44 +1708,45 @@ func updateOpenAPIDataFromComments(reg *descriptor.Registry, swaggerObject inter
 		readOnlyValue.Set(reflect.ValueOf(true))
 	}
 
-	usingTitle := false
-	if !summaryValue.CanSet() {
-		summaryValue = infoObjectValue.FieldByName("Title")
-		usingTitle = true
-	}
-
-	paragraphs := strings.Split(comment, "\n\n")
-
-	// If there is a summary (or summary-equivalent) and it's empty, use the first
-	// paragraph as summary, and the rest as description.
-	if summaryValue.CanSet() {
-		summary := strings.TrimSpace(paragraphs[0])
-		description := strings.TrimSpace(strings.Join(paragraphs[1:], "\n\n"))
-		if !usingTitle || (len(summary) > 0 && summary[len(summary)-1] != '.') {
-			// overrides the schema value only if it's empty
-			// keep the comment precedence when updating the package definition
-			if summaryValue.Len() == 0 || isPackageObject {
-				summaryValue.Set(reflect.ValueOf(summary))
-			}
-			if len(description) > 0 {
-				if !descriptionValue.CanSet() {
-					return fmt.Errorf("encountered object type with a summary, but no description")
-				}
-				// overrides the schema value only if it's empty
-				// keep the comment precedence when updating the package definition
-				if descriptionValue.Len() == 0 || isPackageObject {
-					descriptionValue.Set(reflect.ValueOf(description))
-				}
-			}
-			return nil
+	/*
+		usingTitle := false
+		if !summaryValue.CanSet() {
+			summaryValue = infoObjectValue.FieldByName("Title")
+			usingTitle = true
 		}
-	}
 
+		paragraphs := strings.Split(comment, "\n\n")
+
+			// If there is a summary (or summary-equivalent) and it's empty, use the first
+			// paragraph as summary, and the rest as description.
+			if summaryValue.CanSet() {
+				summary := strings.TrimSpace(paragraphs[0])
+				description := strings.TrimSpace(strings.Join(paragraphs[1:], "\n\n"))
+				if !usingTitle || (len(summary) > 0 && summary[len(summary)-1] != '.') {
+					// overrides the schema value only if it's empty
+					// keep the comment precedence when updating the package definition
+					if summaryValue.Len() == 0 || isPackageObject {
+						summaryValue.Set(reflect.ValueOf(summary))
+					}
+					if len(description) > 0 {
+						if !descriptionValue.CanSet() {
+							return fmt.Errorf("encountered object type with a summary, but no description")
+						}
+						// overrides the schema value only if it's empty
+						// keep the comment precedence when updating the package definition
+						if descriptionValue.Len() == 0 || isPackageObject {
+							descriptionValue.Set(reflect.ValueOf(description))
+						}
+					}
+					return nil
+				}
+			}
+	*/
 	// There was no summary field on the swaggerObject. Try to apply the
 	// whole comment into description if the OpenAPI object description is empty.
 	if descriptionValue.CanSet() {
 		if descriptionValue.Len() == 0 || isPackageObject {
-			descriptionValue.Set(reflect.ValueOf(strings.Join(paragraphs, "\n\n")))
+			descriptionValue.Set(reflect.ValueOf(comment))
 		}
 		return nil
 	}
